@@ -1,16 +1,20 @@
-# Camunda Cloud
+# n8n-nodes-camunda-cloud
+
+n8n nodes for interacting with Camunda Cloud (Zeebe)
+
+## Camunda Cloud
 
 [Camunda Cloud](https://camunda.com/products/cloud/) is a Process Automation as a Service platform with a horizontally scalable [BPMN](https://en.wikipedia.org/wiki/Business_Process_Model_and_Notation) workflow engine (called Zeebe) and built-in tools for collaborative modeling, operations and analytics.
-
-> ## 🔑 Credentials
->
-> You can find authentication information for this node [here](./docs/credentials.md).
 
 ## Supported Features
 
 - Trigger n8n workflows from Camunda Cloud service tasks
 - Create new Camunda Cloud process instances from n8n
 - Publish messages to running Camunda Cloud process instances from n8n
+
+> ## 🔑 Credentials
+>
+> You can find authentication information for this node [here](./docs/credentials.md).
 
 ## Example Use-Case
 
