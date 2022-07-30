@@ -56,8 +56,7 @@ export class CamundaCloudTrigger implements INodeType {
 				type: 'number',
 				required: true,
 				default: 60,
-				description:
-					'Timeout in seconds before the BPMN task needs to be marked as completed',
+				description: 'Timeout in seconds before the BPMN task needs to be marked as completed',
 			},
 			{
 				displayName: 'Auto Complete',
@@ -72,21 +71,13 @@ export class CamundaCloudTrigger implements INodeType {
 	};
 
 	async trigger(this: ITriggerFunctions): Promise<ITriggerResponse> {
-		const credentials = this.getCredentials('camundaCloudApi');
+		const credentials = await this.getCredentials('camundaCloudApi');
 		console.log(JSON.stringify(credentials));
 		if (!credentials) {
-			throw new NodeOperationError(
-				this.getNode(),
-				'Credentials are mandatory!',
-			);
+			throw new NodeOperationError(this.getNode(), 'Credentials are mandatory!');
 		}
 
-		const {
-			clientId,
-			clientSecret,
-			clusterId,
-			clusterRegion,
-		} = credentials;
+		const { clientId, clientSecret, clusterId, clusterRegion } = credentials;
 
 		const zbc = new ZBClient({
 			camundaCloud: {
@@ -99,11 +90,7 @@ export class CamundaCloudTrigger implements INodeType {
 
 		const self = this;
 
-		let zbWorker: ZBWorker<
-			IInputVariables,
-			ICustomHeaders,
-			IOutputVariables
-		>;
+		let zbWorker: ZBWorker<IInputVariables, ICustomHeaders, IOutputVariables>;
 
 		async function manualTriggerFunction() {
 			if (zbWorker) {
@@ -112,9 +99,7 @@ export class CamundaCloudTrigger implements INodeType {
 
 			zbWorker = zbc.createWorker({
 				taskType: self.getNodeParameter('taskType') as string,
-				timeout: Duration.seconds.of(
-					self.getNodeParameter('timeout') as number,
-				),
+				timeout: Duration.seconds.of(self.getNodeParameter('timeout') as number),
 				taskHandler: async (job: ZeebeJob) => {
 					self.emit([
 						self.helpers.returnJsonArray({

@@ -1,11 +1,6 @@
 import { IExecuteFunctions } from 'n8n-core';
 
-import {
-	IDataObject,
-	INodeExecutionData,
-	INodeType,
-	INodeTypeDescription,
-} from 'n8n-workflow';
+import { IDataObject, INodeExecutionData, INodeType, INodeTypeDescription } from 'n8n-workflow';
 
 import { v4 as uuidv4 } from 'uuid';
 
@@ -21,8 +16,7 @@ export class CamundaCloud implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Camunda Cloud',
 		name: 'camundaCloud',
-		subtitle:
-			'={{$parameter["operation"] + ": " + $parameter["resource"]}}',
+		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
 		icon: 'file:camundaCloud.svg',
 		group: ['transform'],
 		version: 1,
@@ -40,12 +34,11 @@ export class CamundaCloud implements INodeType {
 			},
 		],
 		properties: [
-			// Node properties which the user gets displayed and
-			// can change on the node.
 			{
 				displayName: 'Resource',
 				name: 'resource',
 				type: 'options',
+				noDataExpression: true,
 				options: [
 					{
 						name: 'Process Instance',
@@ -68,6 +61,7 @@ export class CamundaCloud implements INodeType {
 				displayName: 'Operation',
 				name: 'operation',
 				type: 'options',
+				noDataExpression: true,
 				displayOptions: {
 					show: {
 						resource: ['processInstance'],
@@ -77,16 +71,17 @@ export class CamundaCloud implements INodeType {
 					{
 						name: 'Create',
 						value: 'create',
-						description: 'Create a new process instance',
+						description: 'Create a process instance',
+						action: 'Create a process instance',
 					},
 				],
 				default: 'create',
-				description: 'The operation to perform',
 			},
 			{
 				displayName: 'Operation',
 				name: 'operation',
 				type: 'options',
+				noDataExpression: true,
 				displayOptions: {
 					show: {
 						resource: ['job'],
@@ -97,15 +92,16 @@ export class CamundaCloud implements INodeType {
 						name: 'Complete',
 						value: 'complete',
 						description: 'Complete an activated Zeebe job',
+						action: 'Complete a job',
 					},
 					{
 						name: 'Fail',
 						value: 'fail',
 						description: 'Mark an activated Zeebe job as failed',
+						action: 'Fail a job',
 					},
 				],
 				default: 'complete',
-				description: 'The operation to perform',
 			},
 			{
 				displayName: 'Job Key',
@@ -120,7 +116,7 @@ export class CamundaCloud implements INodeType {
 				},
 				default: '',
 				description:
-					'Identifier of an already activated BPMN job, e.g. as returned by the Camunda Cloud Trigger node.',
+					'Identifier of an already activated BPMN job, e.g. as returned by the Camunda Cloud Trigger node',
 			},
 			{
 				displayName: 'Job Key',
@@ -135,7 +131,7 @@ export class CamundaCloud implements INodeType {
 				},
 				default: '',
 				description:
-					'Identifier of an already activated BPMN job, e.g. as returned by the Camunda Cloud Trigger node.',
+					'Identifier of an already activated BPMN job, e.g. as returned by the Camunda Cloud Trigger node',
 			},
 			{
 				displayName: 'Error Message',
@@ -155,7 +151,6 @@ export class CamundaCloud implements INodeType {
 				displayName: 'Variables (JSON)',
 				name: 'variables',
 				type: 'json',
-				required: false,
 				displayOptions: {
 					show: {
 						operation: ['complete'],
@@ -183,7 +178,6 @@ export class CamundaCloud implements INodeType {
 				displayName: 'Variables (JSON)',
 				name: 'variables',
 				type: 'json',
-				required: false,
 				displayOptions: {
 					show: {
 						operation: ['create'],
@@ -197,6 +191,7 @@ export class CamundaCloud implements INodeType {
 				displayName: 'Operation',
 				name: 'operation',
 				type: 'options',
+				noDataExpression: true,
 				displayOptions: {
 					show: {
 						resource: ['message'],
@@ -207,16 +202,15 @@ export class CamundaCloud implements INodeType {
 						name: 'Publish',
 						value: 'publish',
 						description: 'Publish a message to the Zeebe broker',
+						action: 'Publish a message',
 					},
 				],
 				default: 'publish',
-				description: 'The operation to perform',
 			},
 			{
 				displayName: 'Correlation Key',
 				name: 'correlationKey',
 				type: 'string',
-				required: false,
 				displayOptions: {
 					show: {
 						operation: ['publish'],
@@ -244,7 +238,6 @@ export class CamundaCloud implements INodeType {
 				displayName: 'Variables (JSON)',
 				name: 'variables',
 				type: 'json',
-				required: false,
 				displayOptions: {
 					show: {
 						operation: ['publish'],
@@ -276,31 +269,17 @@ export class CamundaCloud implements INodeType {
 		const returnData = [];
 		const resource = this.getNodeParameter('resource', 0) as string;
 		const operation = this.getNodeParameter('operation', 0) as string;
-		const credentials = this.getCredentials(
-			'camundaCloudApi',
-		) as IDataObject;
+		const credentials = await this.getCredentials('camundaCloudApi');
 
-		const {
-			clientId,
-			clientSecret,
-			clusterId,
-			clusterRegion,
-		} = credentials;
+		const { clientId, clientSecret, clusterId, clusterRegion } = credentials;
 
 		for (let i = 0; i < items.length; i++) {
 			try {
 				if (resource === 'processInstance') {
 					if (operation === 'create') {
-						const bpmnProcessId = this.getNodeParameter(
-							'bpmnProcessId',
-							i,
-						) as string;
+						const bpmnProcessId = this.getNodeParameter('bpmnProcessId', i) as string;
 
-						let variables =
-							(this.getNodeParameter(
-								'variables',
-								i,
-							) as unknown) ?? {};
+						let variables = (this.getNodeParameter('variables', i) as unknown) ?? {};
 
 						if ('string' === typeof variables) {
 							variables = JSON.parse(variables);
@@ -315,42 +294,23 @@ export class CamundaCloud implements INodeType {
 							},
 						} as ZBClientOptions);
 
-						const zbCreateProcessResult = await zbc.createProcessInstance(
-							bpmnProcessId,
-							variables,
-						);
+						const zbCreateProcessResult = await zbc.createProcessInstance(bpmnProcessId, variables);
 
 						//console.log(`zbCreateProcessResult: ${JSON.stringify(zbCreateProcessResult)}`);
-						returnData.push(
-							(zbCreateProcessResult as unknown) as IDataObject,
-						);
+						returnData.push(zbCreateProcessResult as unknown as IDataObject);
 					}
 				} else if (resource === 'message') {
 					if (operation === 'publish') {
-						const correlationKey =
-							(this.getNodeParameter(
-								'correlationKey',
-								i,
-							) as string) ?? '';
+						const correlationKey = (this.getNodeParameter('correlationKey', i) as string) ?? '';
 
-						let variables =
-							(this.getNodeParameter(
-								'variables',
-								i,
-							) as unknown) ?? {};
+						let variables = (this.getNodeParameter('variables', i) as unknown) ?? {};
 
 						if ('string' === typeof variables) {
 							variables = JSON.parse(variables);
 						}
-						const timeToLive = this.getNodeParameter(
-							'timeToLive',
-							i,
-						) as number;
+						const timeToLive = this.getNodeParameter('timeToLive', i) as number;
 
-						const messageName = this.getNodeParameter(
-							'messageName',
-							i,
-						) as string;
+						const messageName = this.getNodeParameter('messageName', i) as string;
 
 						const zbc = new ZBClient({
 							camundaCloud: {
@@ -383,13 +343,10 @@ export class CamundaCloud implements INodeType {
 						// console.log(
 						// 	`zbPublishMsgResult: ${JSON.stringify(zbPublishMsgResult)}`
 						// );
-						returnData.push(
-							(zbPublishMsgResult as unknown) as IDataObject,
-						);
+						returnData.push(zbPublishMsgResult as unknown as IDataObject);
 					}
 				} else if (resource === 'job') {
-					const jobKey =
-						(this.getNodeParameter('jobKey', i) as string) ?? '';
+					const jobKey = (this.getNodeParameter('jobKey', i) as string) ?? '';
 
 					const zbc = new ZBClient({
 						camundaCloud: {
@@ -400,12 +357,8 @@ export class CamundaCloud implements INodeType {
 						},
 					} as ZBClientOptions);
 
-					if (operation == 'complete') {
-						let variables =
-							(this.getNodeParameter(
-								'variables',
-								i,
-							) as unknown) ?? {};
+					if (operation === 'complete') {
+						let variables = (this.getNodeParameter('variables', i) as unknown) ?? {};
 
 						if ('string' === typeof variables) {
 							variables = JSON.parse(variables);
@@ -418,16 +371,14 @@ export class CamundaCloud implements INodeType {
 
 						returnData.push({ success: true } as IDataObject);
 					} else if (operation === 'fail') {
-						const errorMessage = this.getNodeParameter(
-							'errorMessage',
-							i,
-						) as string;
+						const errorMessage = this.getNodeParameter('errorMessage', i) as string;
 
 						//console.log('FAILING JOB', jobKey);
 						await zbc.failJob({
 							jobKey,
-							retries: 0, //raises an inident
+							retries: 0,
 							errorMessage,
+							retryBackOff: 0,
 						});
 
 						returnData.push({ success: true } as IDataObject);

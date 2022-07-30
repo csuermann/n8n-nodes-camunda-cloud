@@ -3,7 +3,8 @@ import { ICredentialType, INodeProperties, NodePropertyTypes } from 'n8n-workflo
 export class CamundaCloudApi implements ICredentialType {
 	name = 'camundaCloudApi';
 	displayName = 'Camunda Cloud API';
-	documentationUrl = 'camundaCloud';
+	documentationUrl =
+		'https://github.com/csuermann/n8n-nodes-camunda-cloud/tree/master/docs/credentials.md';
 	properties: INodeProperties[] = [
 		{
 			displayName: 'Client ID',

@@ -6,12 +6,12 @@
 	"resources": {
 		"credentialDocumentation": [
 			{
-				"url": "https://docs.n8n.io/credentials/camundaCloud"
+				"url": "https://github.com/csuermann/n8n-nodes-camunda-cloud/tree/master/docs/credentials.md"
 			}
 		],
 		"primaryDocumentation": [
 			{
-				"url": "https://docs.n8n.io/nodes/n8n-nodes-base.camundaCloud/"
+				"url": "https://github.com/csuermann/n8n-nodes-camunda-cloud"
 			}
 		]
 	}
