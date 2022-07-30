@@ -1,6 +1,6 @@
 {
 	"name": "n8n-nodes-camunda-cloud",
-	"version": "0.1.0",
+	"version": "0.0.1",
 	"description": "n8n nodes for interacting with Camunda Cloud (Zeebe)",
 	"keywords": [
 		"n8n-community-node-package",
